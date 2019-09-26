@@ -7,7 +7,7 @@ DiscordEuroscopeExt::DiscordEuroscopeExt() : EuroScopePlugIn::CPlugIn(EuroScopeP
 	DiscordEventHandlers handlers;
 	memset(&handlers, 0, sizeof(handlers));
 	// handlers
-	Discord_Initialize("477907858072272896", &handlers, 1, NULL);
+	Discord_Initialize("623490545628741642", &handlers, 1, NULL);
 	this->EuroInittime = (int)time(NULL);
 
 	char DllPathFile[_MAX_PATH];
@@ -61,9 +61,9 @@ DiscordEuroscopeExt::DiscordEuroscopeExt() : EuroScopePlugIn::CPlugIn(EuroScopeP
 	DisplayUserMessage("Message", "DiscordEuroscope", dmsg, true, true, false, true, false);
 	if (count == 0)
 	{
-		DisplayUserMessage("Message", "DiscordEuroscope", "If you haven't configured this properly, make sure you are writing to", true, true, false, true, false);
-		DisplayUserMessage("Message", "DiscordEuroscope", "DiscordEuroscope_RadioCallsigns.txt, Each line holds a callsign", true, true, false, true, false);
-		DisplayUserMessage("Message", "DiscordEuroscope", "Example: HECC_CTR Cairo Control", true, true, false, true, false);
+		DisplayUserMessage("Message", "DiscordEuroscope_PLVACC", "If you haven't configured this properly, make sure you are writing to", true, true, false, true, false);
+		DisplayUserMessage("Message", "DiscordEuroscope_PLVACC", "DiscordEuroscope_RadioCallsigns.txt, Each line holds a callsign", true, true, false, true, false);
+		DisplayUserMessage("Message", "DiscordEuroscope_PLVACC", "Example: HECC_CTR Cairo Control", true, true, false, true, false);
 	}
 	delete dmsg;
 #endif
@@ -83,13 +83,13 @@ VOID CALLBACK DiscordTimer(_In_ HWND hwnd, _In_ UINT uMsg, _In_ UINT_PTR idEvent
 		return;
 	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
-	discordPresence.largeImageKey = "es";
+	discordPresence.largeImageKey = "kwadrat_logo"; // duzy
 	discordPresence.startTimestamp = inst->EuroInittime;
 	switch (pMyPlugIn->GetConnectionType())
 	{
 		using namespace EuroScopePlugIn;
 	case CONNECTION_TYPE_NO:
-		discordPresence.details = "Idle";
+		discordPresence.details = "Nie podlaczony";
 		Discord_UpdatePresence(&discordPresence);
 		return;
 	case CONNECTION_TYPE_PLAYBACK:
@@ -117,18 +117,43 @@ VOID CALLBACK DiscordTimer(_In_ HWND hwnd, _In_ UINT uMsg, _In_ UINT_PTR idEvent
 	{
 		if (inst->RadioCallsigns.find(callsign) != inst->RadioCallsigns.end())
 			discordPresence.largeImageText = inst->RadioCallsigns[callsign].c_str();
-		sprintf(tmp, "%s %.2fMHz", callsign, frequency);
-		sprintf(tmp2, "Aircraft tracked (%i of %i)", inst->CountTrackedAC(), inst->CountACinRange());
-		if (inst->tracklist.size() > 0) {
-			sprintf(tmp3, "Total tracks: %i", inst->tracklist.size());
+		sprintf(tmp, "%s", inst->RadioCallsigns[callsign].c_str());
+		sprintf(tmp2, "%s", callsign);
+		if (true) {
+			sprintf(tmp3, "Visit pl-vacc.org.pl");
 			discordPresence.smallImageText = tmp3;
-			discordPresence.smallImageKey = "ttrks";
+			switch (controller.GetRating())
+			{
+			case 1: // OBS
+				discordPresence.smallImageKey = "logo_obs";
+				break;
+			case 2: // STU
+				discordPresence.smallImageKey = "logo_stu";
+				break;
+			case 3: // STU2
+				discordPresence.smallImageKey = "logo_stu2";
+				break;
+			case 4: // STU3
+				discordPresence.smallImageKey = "logo_stu3";
+				break;
+			case 5: // CTR
+				discordPresence.smallImageKey = "logo_ctr";
+				break;
+			default:
+				discordPresence.smallImageKey = "logo_default";
+				break;
+
+			}
+			
 		}
 	}
 	else
 	{
-		sprintf(tmp, "Observing as %s", callsign);
-		sprintf(tmp2, "Aircraft in range: %i", inst->CountACinRange());
+		sprintf(tmp, "Obserwuje ruch");
+		sprintf(tmp2, "jako %s", callsign);
+		sprintf(tmp3, "Visit pl-vacc.org.pl");
+		discordPresence.smallImageText = tmp3;
+		discordPresence.smallImageKey = "logo_kwadrat_obs";
 	}
 	discordPresence.details = tmp;
 	discordPresence.state = tmp2;
